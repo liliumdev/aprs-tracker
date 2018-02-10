@@ -11,7 +11,7 @@ import threading
 i = 0
 
 class Tracker:
-    api_url = 'http://192.168.0.10/'
+    api_url = 'http://77.238.194.113/'
     name = 'Unknown tracker'
     do_ping = True
     lat_from = 0
@@ -98,12 +98,12 @@ class Tracker:
 
 print("Tracking starting ...")
 # Bosnia
-t = Tracker("Bosnian tracker @ Pofalici", {
-    'lat_from':   45.7905094,
-    'lat_to':     42.0370543,
-    'long_from':  13.1616210,
-    'long_to':    23.7084960
-    })
+#t = Tracker("Bosnian tracker @ Pofalici", {
+#    'lat_from':   45.7905094,
+#    'lat_to':     42.0370543,
+#    'long_from':  13.1616210,
+#    'long_to':    23.7084960
+#    })
 
 # Dusseldorf
 #t = Tracker("Ahmed's tracker @ Pofalici", {
@@ -114,18 +114,18 @@ t = Tracker("Bosnian tracker @ Pofalici", {
 #    })
 
 #No limit
-#t = Tracker("Ahmed's world tracker", {
-#    'lat_from':  0,
-#    'lat_to':    0,
-#    'long_from': 0,
-#    'long_to':   0
-#    })
+t = Tracker("Ahmed's world tracker", {
+    'lat_from':  0,
+    'lat_to':    0,
+    'long_from': 0,
+    'long_to':   0
+    })
 
 
 while True:
     try:    
         print("Starting ...")
-        t.track()
+        t.track(False)
         print("Started.")
     except KeyboardInterrupt:
         print("Closing ...")
