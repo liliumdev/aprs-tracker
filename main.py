@@ -5,13 +5,14 @@ import logging
 import json
 import requests
 import threading
+import sys
 
 #logging.basicConfig(level=logging.DEBUG) # level=10
 
 i = 0
 
 class Tracker:
-    api_url = 'http://77.238.194.113/'
+    api_url = 'http://77.238.199.207/'
     name = 'Unknown tracker'
     do_ping = True
     lat_from = 0
@@ -23,27 +24,36 @@ class Tracker:
     tracked_properties = ['latitude', 'longitude', 'altitude', 'from', 'to',
                         'format', 'symbol', 'symbol_table', 'comment',
                         'object_name', 'speed', 'message_text', 'raw']
+    listenStdin = False
 
-    def __init__(self, name, geo_constraints):
+    def __init__(self, name, geo_constraints, listenStdin=False):
          self.name = name
          self.lat_from  = geo_constraints['lat_from']
          self.lat_to    = geo_constraints['lat_to']
          self.long_from = geo_constraints['long_from']
          self.long_to   = geo_constraints['long_to']
+         self.listenStdin = listenStdin
 
     def track(self, filter=True):
         self.ping()
-        AIS = None
-        if filter:
-            print("Setting filter...")
-            AIS = aprslib.IS("N0C4LL", port=14580, skip_login=False)
-            AIS.set_filter("a/{}/{}/{}/{}".format(self.lat_from, self.long_from,
-                                                  self.lat_to, self.long_to))
+        if self.listenStdin:
+            print "Listening to stdin ..."
+            while True:
+                raw_packet = sys.stdin.readline().strip()
+                if raw_packet:
+                    self.packet_received(raw_packet)
         else:
-            AIS = aprslib.IS("N0C4LL")
-            
-        AIS.connect()
-        AIS.consumer(self.packet_received, raw=True)        
+            AIS = None
+            if filter:
+                print("Setting filter...")
+                AIS = aprslib.IS("N0C4LL", port=14580, skip_login=False)
+                AIS.set_filter("a/{}/{}/{}/{}".format(self.lat_from, self.long_from,
+                                                      self.lat_to, self.long_to))
+            else:
+                AIS = aprslib.IS("N0C4LL")
+                
+            AIS.connect()
+            AIS.consumer(self.packet_received, raw=True)        
 
     def ping(self):
         if self.do_ping:
@@ -71,6 +81,7 @@ class Tracker:
             packet = self.parse_packet(raw_packet)
             print('Packet #{} received'.format(self.packets_received))
             response = requests.post(self.api_url + 'store', json=packet)
+            print(response.text)
         except Exception as e:
             self.packets_lost += 1
             #print('Packet lost due to unknown format or unsupported parsing')
@@ -113,14 +124,30 @@ print("Tracking starting ...")
 #    'long_to':   6.9493685
 #    })
 
-#No limit
-t = Tracker("Ahmed's world tracker", {
+
+
+# Do you want to receive APRS packets via
+# 1. APRS-IS"
+# 2. stdin
+mode = 2
+
+t = None
+
+if mode == '1':
+    t = Tracker("Ahmed's world tracker", {
     'lat_from':  0,
     'lat_to':    0,
     'long_from': 0,
     'long_to':   0
     })
-
+else:
+    t = Tracker("Ahmed's world tracker", {
+    'lat_from':  0,
+    'lat_to':    0,
+    'long_from': 0,
+    'long_to':   0
+    }, True)
+    
 
 while True:
     try:    
