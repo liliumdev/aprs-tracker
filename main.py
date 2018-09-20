@@ -6,13 +6,12 @@ import json
 import requests
 import threading
 import sys
-
-#logging.basicConfig(level=logging.DEBUG) # level=10
+import argparse
 
 i = 0
 
 class Tracker:
-    api_url = 'http://77.238.199.207/'
+    api_url = 'http://aprs/'
     name = 'Unknown tracker'
     do_ping = True
     lat_from = 0
@@ -43,6 +42,7 @@ class Tracker:
                 if raw_packet:
                     self.packet_received(raw_packet)
         else:
+            print "Listening to APRS-IS"
             AIS = None
             if filter:
                 print("Setting filter...")
@@ -72,7 +72,6 @@ class Tracker:
                 }
             
             response = requests.post(self.api_url + 'ping', json=data)
-            print(response.text)
 
     def packet_received(self, raw_packet):
         self.packets_received += 1
@@ -84,9 +83,7 @@ class Tracker:
             print(response.text)
         except Exception as e:
             self.packets_lost += 1
-            #print('Packet lost due to unknown format or unsupported parsing')
-            print(e)
-            print(raw_packet)
+            print('Packet lost due to unknown format or unsupported parsing')
             pass
 
     def parse_packet(self, raw_packet):        
@@ -107,7 +104,6 @@ class Tracker:
 
         return ''                  
 
-print("Tracking starting ...")
 # Bosnia
 #t = Tracker("Bosnian tracker @ Pofalici", {
 #    'lat_from':   45.7905094,
@@ -124,21 +120,27 @@ print("Tracking starting ...")
 #    'long_to':   6.9493685
 #    })
 
+parser = argparse.ArgumentParser()
+parser.add_argument('--mode', '-m', help='One of \'aprs-is\' or \'stdin\' - denotes does the script connect to APRS-IS or wait for stdin input.', type= str)
 
+print parser.format_help()
+print ""
 
-# Do you want to receive APRS packets via
-# 1. APRS-IS"
-# 2. stdin
-mode = 2
+args = parser.parse_args()
 
-t = None
+mode = 1 # Default is APRS-IS
 
-if mode == '1':
-    t = Tracker("Ahmed's world tracker", {
-    'lat_from':  0,
-    'lat_to':    0,
-    'long_from': 0,
-    'long_to':   0
+if args.mode == 'aprs-is':
+    mode = 1
+elif args.mode == 'stdin':
+    mode = 2
+
+if mode == 1:
+     t = Tracker("Ahmed's world tracker", {
+    'lat_from':  45.7905094,
+    'lat_to':    42.0370543,
+    'long_from': 13.1616210,
+    'long_to':   23.7084960
     })
 else:
     t = Tracker("Ahmed's world tracker", {
