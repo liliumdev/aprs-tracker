@@ -136,11 +136,11 @@ elif args.mode == 'stdin':
     mode = 2
 
 if mode == 1:
-     t = Tracker("Ahmed's world tracker", {
-    'lat_from':  45.7905094,
-    'lat_to':    42.0370543,
-    'long_from': 13.1616210,
-    'long_to':   23.7084960
+     t = Tracker("Ahmed's Bosnia tracker", {
+    'lat_from':  47.225630,
+    'long_from': 15.016010,
+    'lat_to':    42.300167,
+    'long_to':   21.099986
     })
 else:
     t = Tracker("Ahmed's world tracker", {
@@ -154,7 +154,7 @@ else:
 while True:
     try:    
         print("Starting ...")
-        t.track(False)
+        t.track(True)
         print("Started.")
     except KeyboardInterrupt:
         print("Closing ...")
